@@ -1,0 +1,17 @@
+import tkinter as tk
+
+# Crear la ventana principal
+root = tk.Tk()
+root.title("Ventana 500x700")
+
+# Establecer el tamaño exacto
+root.geometry("500x700")
+
+# Posicionar la ventana a la izquierda de la pantalla (coordenadas 0, 0)
+root.geometry("+0+0")
+
+# Evitar que la ventana sea redimensionable
+root.resizable(False, False)
+
+# Iniciar el loop de la interfaz gráfica
+root.mainloop()
