@@ -6,8 +6,9 @@ import threading
 
 # Coordenadas de la siguiente área donde hacer clic después del login
 coordenadas_siguiente_area = (500, 400)  # Ajusta según la posición deseada
-coordenadas_finales_1 = (379, 54)  # Primera coordenada final
-coordenadas_finales_2 = (22, 55)  # Segunda coordenada final
+coordenadas_finales_1 = (379, 54)         # Primera coordenada final
+coordenadas_click_previo = (211, 392)     # Coordenadas para hacer clic antes del cronómetro
+# Se eliminan las coordenadas_finales_2 ya que ya no se realizará ese clic
 
 # Colores para la interfaz
 dark_bg = "#1e1e1e"
@@ -31,6 +32,20 @@ def mover_mouse_humano(x, y):
     pyautogui.moveTo(x, y, duration=0.3)
     log_event(f"Moviendo mouse a ({x}, {y})")
 
+def detectar_captcha():
+    captcha_path = "captcha.png"  # Ruta de la imagen del captcha de referencia
+    try:
+        captcha_detectado = pyautogui.locateOnScreen(captcha_path, confidence=0.6)
+        if captcha_detectado:
+            log_event("¡Captcha detectado! Se necesita intervención manual.", log_text_color_alert)
+            return True
+        else:
+            log_event("No se detectó captcha.")
+            return False
+    except Exception as e:
+        log_event(f"Error al detectar captcha: {e}", log_text_color_alert)
+        return False
+
 def ingresar_codigo():
     log_event("Iniciando proceso de login...")
     pyautogui.click(193, 335)  # Simulación de clic en el área de login
@@ -46,22 +61,31 @@ def ingresar_codigo():
     pyautogui.click()
     log_event("Clic realizado en la siguiente área.")
     
-    # Realizar clic izquierdo en las coordenadas especificadas
+    # Realizar clic izquierdo en las primeras coordenadas finales
     time.sleep(0.5)
     mover_mouse_humano(*coordenadas_finales_1)
     pyautogui.click()
     log_event("Clic izquierdo realizado en las primeras coordenadas finales.")
+    
+    # Hacer clic en las coordenadas (211, 392) antes de iniciar el cronómetro
+    time.sleep(0.5)
+    mover_mouse_humano(*coordenadas_click_previo)
+    pyautogui.click()
+    log_event("Clic realizado en las coordenadas (211, 392).")
     
     # Temporizador de 5 segundos en el registro de eventos
     for i in range(5, 0, -1):
         log_event(f"Esperando {i} segundos...", log_text_color_alert)
         time.sleep(1)
     
-    log_event("Comenzando a trabajar...", log_text_color_alert)
+    log_event("Verificando si hay captcha...", log_text_color_alert)
+    if detectar_captcha():
+        pyautogui.screenshot("captcha_no_detectado.png")
+        log_event("Se guardó una captura del captcha no detectado.", log_text_color_alert)
+        return
     
-    mover_mouse_humano(*coordenadas_finales_2)
-    pyautogui.click()
-    log_event("Clic izquierdo realizado en las segundas coordenadas finales.")
+    # Ya no se realiza el clic final; se deja sólo el mensaje de continuación
+    log_event("Comenzando a trabajar...", log_text_color_alert)
 
 def iniciar_proceso():
     threading.Thread(target=ingresar_codigo).start()
