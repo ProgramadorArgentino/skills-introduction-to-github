@@ -1,0 +1,75 @@
+import tkinter as tk
+from tkinter import ttk, messagebox
+import pyautogui
+import time
+import threading
+
+# Coordenadas de la siguiente área donde hacer clic después del login
+coordenadas_siguiente_area = (500, 400)  # Ajusta según la posición deseada
+coordenadas_finales_1 = (379, 54)  # Primera coordenada final
+coordenadas_finales_2 = (22, 55)  # Segunda coordenada final
+
+# Colores para la interfaz
+dark_bg = "#1e1e1e"
+dark_fg = "#FFFFFF"
+dark_btn = "#4CAF50"
+log_text_color_normal = "green"
+log_text_color_alert = "red"
+
+# Configuración de la interfaz Tkinter
+root = tk.Tk()
+root.title("Automatización de Login")
+root.geometry("400x300")
+root.config(bg=dark_bg)
+
+def log_event(mensaje, color=log_text_color_normal):
+    log_text.tag_configure("alert", foreground=log_text_color_alert)
+    log_text.insert(tk.END, f"{mensaje}\n", ("alert" if color == log_text_color_alert else "normal"))
+    log_text.see(tk.END)
+
+def mover_mouse_humano(x, y):
+    pyautogui.moveTo(x, y, duration=0.3)
+    log_event(f"Moviendo mouse a ({x}, {y})")
+
+def ingresar_codigo():
+    log_event("Iniciando proceso de login...")
+    pyautogui.click(193, 335)  # Simulación de clic en el área de login
+    time.sleep(1)
+    pyautogui.write("7a6e437aa9f156e8cc3560327ea7946b")
+    time.sleep(0.5)
+    pyautogui.press('enter')
+    log_event("Código ingresado y ENTER presionado.")
+    
+    # Esperar y hacer clic en la siguiente área
+    time.sleep(2)
+    mover_mouse_humano(*coordenadas_siguiente_area)
+    pyautogui.click()
+    log_event("Clic realizado en la siguiente área.")
+    
+    # Realizar clic izquierdo en las coordenadas especificadas
+    time.sleep(0.5)
+    mover_mouse_humano(*coordenadas_finales_1)
+    pyautogui.click()
+    log_event("Clic izquierdo realizado en las primeras coordenadas finales.")
+    
+    # Temporizador de 5 segundos en el registro de eventos
+    for i in range(5, 0, -1):
+        log_event(f"Esperando {i} segundos...", log_text_color_alert)
+        time.sleep(1)
+    
+    log_event("Comenzando a trabajar...", log_text_color_alert)
+    
+    mover_mouse_humano(*coordenadas_finales_2)
+    pyautogui.click()
+    log_event("Clic izquierdo realizado en las segundas coordenadas finales.")
+
+def iniciar_proceso():
+    threading.Thread(target=ingresar_codigo).start()
+
+btn_iniciar = tk.Button(root, text="Ejecutar", command=iniciar_proceso, bg=dark_btn, fg=dark_fg, font=("Helvetica", 12, "bold"))
+btn_iniciar.pack(pady=20)
+
+log_text = tk.Text(root, height=10, width=50, bg='black', fg=log_text_color_normal, font=("Courier New", 10))
+log_text.pack()
+
+root.mainloop()
